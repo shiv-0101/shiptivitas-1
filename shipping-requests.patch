@@ -1,0 +1,61 @@
+diff --git a/src/Board.js b/src/Board.js
+index f9d24c2..8351e8c 100644
+--- a/src/Board.js
++++ b/src/Board.js
+@@ -4,6 +4,8 @@ import 'dragula/dist/dragula.css';
+ import Swimlane from './Swimlane';
+ import './Board.css';
+ 
++const LANE_KEYS = ['backlog', 'inProgress', 'complete'];
++
+ export default class Board extends React.Component {
+   constructor(props) {
+     super(props);
+@@ -36,7 +38,9 @@ export default class Board extends React.Component {
+       this.swimlanes.backlog.current,
+       this.swimlanes.inProgress.current,
+       this.swimlanes.complete.current,
+-    ]);
++    ], {
++      revertOnSpill: true,
++    });
+ 
+     this.drake.on('drop', (el, target, source, sibling) => {
+       this.handleDrop(el, target, source, sibling);
+@@ -75,6 +79,10 @@ export default class Board extends React.Component {
+   }
+ 
+   handleDrop(el, target, source, sibling) {
++    if (!target || !source) {
++      return;
++    }
++
+     const cardId = el.getAttribute('data-id');
+     const sourceLane = this.getLaneByContainer(source);
+     const targetLane = this.getLaneByContainer(target);
+@@ -84,11 +92,10 @@ export default class Board extends React.Component {
+     }
+ 
+     this.setState(prevState => {
+-      const nextClients = {
+-        backlog: [...prevState.clients.backlog],
+-        inProgress: [...prevState.clients.inProgress],
+-        complete: [...prevState.clients.complete],
+-      };
++      const nextClients = LANE_KEYS.reduce((clientsByLane, lane) => {
++        clientsByLane[lane] = [...prevState.clients[lane]];
++        return clientsByLane;
++      }, {});
+ 
+       const sourceLaneClients = nextClients[sourceLane];
+       const movedCardIndex = sourceLaneClients.findIndex(client => client.id === cardId);
+@@ -104,7 +111,8 @@ export default class Board extends React.Component {
+ 
+       const targetLaneClients = nextClients[targetLane];
+       const targetIndex = this.getTargetIndex(targetLaneClients, sibling);
+-      targetLaneClients.splice(targetIndex, 0, updatedCard);
++      const boundedTargetIndex = Math.max(0, Math.min(targetIndex, targetLaneClients.length));
++      targetLaneClients.splice(boundedTargetIndex, 0, updatedCard);
+ 
+       return {
+         clients: nextClients,
