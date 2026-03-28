@@ -1,0 +1,16 @@
+I updated the Shipping Requests board using Dragula.
+
+I made all tasks start in the Backlog swimlane.
+I kept three swimlanes: Backlog, In Progress, and Complete.
+I made sure each swimlane uses the Swimlane-column class.
+
+I added drag and drop so I can move cards up and down to reorder them.
+I also made cards stay in the new swimlane after I drop them there.
+
+I updated card status when I move it to a new swimlane.
+Because of that, card colors now change by swimlane:
+- Backlog is grey
+- In Progress is blue
+- Complete is green
+
+I created a patch file with these changes for upload.
